@@ -1,5 +1,6 @@
 package br.com.ericson.picpay_challenge.entity;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -23,6 +24,8 @@ public class UserEntity {
     private String email;
 
     private String password;
+
+    private BigDecimal balance;
 
     @Column(unique = true)
     private String cpfCnpj;

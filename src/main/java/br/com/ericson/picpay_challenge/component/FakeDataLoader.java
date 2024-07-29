@@ -5,6 +5,7 @@ import com.github.javafaker.Faker;
 import br.com.ericson.picpay_challenge.entity.UserEntity;
 import br.com.ericson.picpay_challenge.repositories.UserRepository;
 
+import java.math.BigDecimal;
 import java.util.Random;
 
 import org.hibernate.usertype.UserType;
@@ -37,6 +38,7 @@ public class FakeDataLoader implements CommandLineRunner {
                     user.setUserType("PJ");
                     user.setCpfCnpj(faker.number().digits(14));
                 }
+                user.setBalance(new BigDecimal(faker.number().randomDouble(2, 0, 10000)));
                 user.setEmail(faker.internet().emailAddress());
                 user.setPassword(faker.internet().password());
                 userRepository.save(user);
