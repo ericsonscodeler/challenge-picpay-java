@@ -1,6 +1,7 @@
-package br.com.ericson.picpay_challenge.service.dto;
+package br.com.ericson.picpay_challenge.dto;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TransferDTO {
+public class TransferResponseDTO {
 
-    private Long payerId;
-    private Long payee;
+    private UUID payer;
+    private UUID payee;
     private BigDecimal value;
 }

@@ -9,5 +9,5 @@ import br.com.ericson.picpay_challenge.entity.UserEntity;
 
 public interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
-    Optional<UserEntity> findById(Long id);
+    Optional<UserEntity> findById(UUID id);
 }
