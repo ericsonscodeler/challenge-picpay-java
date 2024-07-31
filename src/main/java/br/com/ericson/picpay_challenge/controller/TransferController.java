@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.ericson.picpay_challenge.dto.TransferRequestDTO;
+import br.com.ericson.picpay_challenge.dto.TransferResponseDTO;
 import br.com.ericson.picpay_challenge.service.TransferService;
 
 @RestController
@@ -21,15 +22,11 @@ public class TransferController {
     @PostMapping("/api/transfer")
     public ResponseEntity<Object> transfer(@RequestBody TransferRequestDTO request) {
         try {
-            var result = TransferRequestDTO.builder()
-                    .payer(request.getPayer())
-                    .payee(request.getPayee())
-                    .value(request.getValue())
-                    .build();
+            this.transferService.moneyTransfer(request.getPayer(), request.getPayee(), request.getValue());
 
-            return ResponseEntity.ok().body(result);
+            return ResponseEntity.ok().body(new TransferResponseDTO<>("Transferência realizada com sucesso."));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new TransferResponseDTO<>(e.getMessage()));
         }
     }
 }

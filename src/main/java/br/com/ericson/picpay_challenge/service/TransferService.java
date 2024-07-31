@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import br.com.ericson.picpay_challenge.dto.TransferResponseDTO;
 import br.com.ericson.picpay_challenge.entity.UserEntity;
 import br.com.ericson.picpay_challenge.exceptions.InsufficientBalanceException;
+import br.com.ericson.picpay_challenge.exceptions.InvalidPayerException;
 import br.com.ericson.picpay_challenge.exceptions.PayeeNotFoundException;
 import br.com.ericson.picpay_challenge.exceptions.PayerNotFoundException;
 import br.com.ericson.picpay_challenge.repositories.UserRepository;
@@ -21,7 +22,7 @@ public class TransferService {
     @Autowired
     private UserRepository userRepository;
 
-    public ResponseEntity<TransferResponseDTO> moneyTransfer(UUID payerId, UUID payeeId, BigDecimal value) {
+    public void moneyTransfer(UUID payerId, UUID payeeId, BigDecimal value) {
 
         UserEntity payer = userRepository.findById(payerId).orElseThrow(() -> {
             throw new PayerNotFoundException();
@@ -30,6 +31,10 @@ public class TransferService {
         UserEntity payee = userRepository.findById(payeeId).orElseThrow(() -> {
             throw new PayeeNotFoundException();
         });
+
+        if (!payer.getUserType().equals("PF")) {
+            throw new InvalidPayerException();
+        }
 
         if (payer.getBalance().compareTo(value) < 0) {
             throw new InsufficientBalanceException();
@@ -40,13 +45,5 @@ public class TransferService {
 
         userRepository.save(payer);
         userRepository.save(payee);
-
-        var transferDto = TransferResponseDTO.builder()
-                .payer(payerId)
-                .payee(payeeId)
-                .value(value)
-                .build();
-
-        return ResponseEntity.ok(transferDto);
     }
 }
