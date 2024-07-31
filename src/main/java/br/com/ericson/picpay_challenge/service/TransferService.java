@@ -1,14 +1,13 @@
 package br.com.ericson.picpay_challenge.service;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import br.com.ericson.picpay_challenge.dto.TransferResponseDTO;
+import br.com.ericson.picpay_challenge.dto.AuthorizationRequestDTO;
+import br.com.ericson.picpay_challenge.dto.AuthorizationResponseDTO;
 import br.com.ericson.picpay_challenge.entity.UserEntity;
 import br.com.ericson.picpay_challenge.exceptions.InsufficientBalanceException;
 import br.com.ericson.picpay_challenge.exceptions.InvalidPayerException;
@@ -21,6 +20,9 @@ public class TransferService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AuthorizationService authorizationService;
 
     public void moneyTransfer(UUID payerId, UUID payeeId, BigDecimal value) {
 
@@ -38,6 +40,12 @@ public class TransferService {
 
         if (payer.getBalance().compareTo(value) < 0) {
             throw new InsufficientBalanceException();
+        }
+
+        AuthorizationResponseDTO authorizationResponse = authorizationService.checkAuthorization();
+
+        if (!authorizationResponse.getStatus()) {
+            throw new RuntimeException(authorizationResponse.getMessage());
         }
 
         payer.setBalance(payer.getBalance().subtract(value));
