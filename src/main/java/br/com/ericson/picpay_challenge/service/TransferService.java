@@ -27,6 +27,9 @@ public class TransferService {
     @Autowired
     private RabbitMqProducer rabbitMqProducer;
 
+    @Autowired
+    private EmailNotificationService emailNotificationService;
+
     public void moneyTransfer(UUID payerId, UUID payeeId, BigDecimal value) {
 
         UserEntity payer = userRepository.findById(payerId).orElseThrow(() -> {
@@ -54,13 +57,23 @@ public class TransferService {
             throw new RuntimeException(authorizationResponse.getMessage());
         }
 
-        payer.setBalance(payer.getBalance().subtract(value));
-        payee.setBalance(payee.getBalance().add(value));
+        String notificationMessage = "Transferência de " + value + " de " + payerId + " para " + payeeId
+                + " concluída com sucesso.";
 
-        String notificationMessage = "Transferência concluída com sucesso.";
+        System.out.println(notificationMessage);
         rabbitMqProducer.sendMessage(RabbitMqConfig.QUEUE_NAME, notificationMessage);
 
         userRepository.save(payer);
         userRepository.save(payee);
+
+        // Enviar emails de notificação
+        String payerEmail = payer.getEmail();
+        String payeeEmail = payee.getEmail();
+        String emailSubject = "Notificação de Transferência";
+        String emailBody = "Transferência de " + value + " de " + payer.getName() + " para " + payee.getName()
+                + " concluída com sucesso.";
+
+        emailNotificationService.sendEmail(payerEmail, emailSubject, emailBody);
+        emailNotificationService.sendEmail(payeeEmail, emailSubject, emailBody);
     }
 }
