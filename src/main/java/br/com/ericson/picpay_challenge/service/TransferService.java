@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.com.ericson.picpay_challenge.dto.AuthorizationRequestDTO;
+import br.com.ericson.picpay_challenge.config.RabbitMqConfig;
 import br.com.ericson.picpay_challenge.dto.AuthorizationResponseDTO;
 import br.com.ericson.picpay_challenge.entity.UserEntity;
 import br.com.ericson.picpay_challenge.exceptions.InsufficientBalanceException;
@@ -23,6 +23,9 @@ public class TransferService {
 
     @Autowired
     private AuthorizationService authorizationService;
+
+    @Autowired
+    private RabbitMqProducer rabbitMqProducer;
 
     public void moneyTransfer(UUID payerId, UUID payeeId, BigDecimal value) {
 
@@ -45,11 +48,17 @@ public class TransferService {
         AuthorizationResponseDTO authorizationResponse = authorizationService.checkAuthorization();
 
         if (!authorizationResponse.getStatus()) {
+            String errorMessage = "Transferência não autorizada!";
+            rabbitMqProducer.sendMessage(RabbitMqConfig.QUEUE_NAME, errorMessage);
+
             throw new RuntimeException(authorizationResponse.getMessage());
         }
 
         payer.setBalance(payer.getBalance().subtract(value));
         payee.setBalance(payee.getBalance().add(value));
+
+        String notificationMessage = "Transferência concluída com sucesso.";
+        rabbitMqProducer.sendMessage(RabbitMqConfig.QUEUE_NAME, notificationMessage);
 
         userRepository.save(payer);
         userRepository.save(payee);
