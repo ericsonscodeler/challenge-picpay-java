@@ -28,7 +28,7 @@ public class FakeDataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (userRepository.count() == 0) {
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 10; i++) {
                 UserEntity user = new UserEntity();
                 user.setName(faker.name().fullName());
                 if (random.nextBoolean()) {
