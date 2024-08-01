@@ -1,0 +1,21 @@
+resilience4j:
+  retry:
+    instances:
+      notifyService:
+        maxAttempts: 3
+        waitDuration: 2s
+  circuitbreaker:
+    instances:
+      notifyService:
+        registerHealthIndicator: true
+        ringBufferSizeInClosedState: 5
+        ringBufferSizeInHalfOpenState: 2
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
